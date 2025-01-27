@@ -12,7 +12,7 @@ INSERT INTO Cookie (CookieID, Type, CookieName, GlutenFree, DairyFree) VALUES
 (3, 'SC', 'Strawberry Creme', true, false),
 (4, 'OR', 'Oatmeal Raisin', true, true);
 
-INSERT INTO Order (OrderID, ShopID, CustomerID) VALUES
+INSERT INTO "Order" (OrderID, ShopID, CustomerID) VALUES
 (1, 1, 1),
 (2, 1, 3),
 (3, 2, 2),
