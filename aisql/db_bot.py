@@ -49,7 +49,7 @@ def getChatGptResponse(content):
         model="gpt-4o",
         messages=[{"role": "user", "content": content}],
         stream=True,
-        temperature=3.5,
+        temperature=1,
         top_p=1,
     )
 
