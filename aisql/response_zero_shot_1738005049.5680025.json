@@ -1,0 +1,55 @@
+{
+  "strategy": "zero_shot",
+  "prompt_prefix": "CREATE TABLE Customer (\n    CustomerID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,\n    FirstName TEXT NOT NULL,\n    LastName TEXT NOT NULL,\n    Email TEXT NOT NULL,\n    Birthday DATE NOT NULL,\n    Points INTEGER NOT NULL\n);\n\nCREATE TABLE \"Order\" (\n    OrderID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,\n    ShopID INTEGER NOT NULL,\n    CustomerID INTEGER NOT NULL,\n    FOREIGN KEY (ShopID) REFERENCES Shop (ShopID),\n    FOREIGN KEY (CustomerID) REFERENCES Customer (CustomerID)\n);\n\nCREATE TABLE CookieOrder (\n    OrderID INTEGER NOT NULL,\n    CookieID INTEGER NOT NULL,\n    Amount INTEGER NOT NULL,\n    PRIMARY KEY (OrderID, CookieID),\n    FOREIGN KEY (OrderID) REFERENCES \"Order\" (OrderID)\n);\n\nCREATE TABLE Cookie (\n    CookieID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,\n    Type TEXT NOT NULL,\n    CookieName TEXT NOT NULL,\n    GlutenFree BOOLEAN NOT NULL,\n    DairyFree BOOLEAN NOT NULL\n);\n\nCREATE TABLE Shop (\n    ShopID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,\n    AddressID INTEGER NOT NULL,\n    PhoneNumber TEXT NOT NULL,\n    FOREIGN KEY (AddressID) REFERENCES Address (AddressID)\n);\n\nCREATE TABLE CookieShop (\n    ShopID INTEGER NOT NULL,\n    CookieID INTEGER NOT NULL,\n    PRIMARY KEY (ShopID, CookieID),\n    FOREIGN KEY (CookieID) REFERENCES Cookie (CookieID)\n);\n\nCREATE TABLE Address (\n    AddressID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,\n    State TEXT NOT NULL,\n    Zip INTEGER NOT NULL,\n    City TEXT NOT NULL\n);\n\n-- Add constraints\nPRAGMA foreign_keys = ON;\n Give me a sqlite select statement that answers the question. Only respond with sqlite syntax. If there is an error do not explain it!",
+  "questionResults": [
+    {
+      "question": "Which shop sells the most cookies?",
+      "sql": "\nSELECT Shop.ShopID, SUM(CookieOrder.Amount) AS CookieCount\nFROM Shop\nJOIN \"Order\" ON Shop.ShopID = \"Order\".ShopID\nJOIN CookieOrder ON \"Order\".OrderID = CookieOrder.OrderID\nGROUP BY Shop.ShopID\nORDER BY CookieCount DESC\nLIMIT 1;\n",
+      "queryRawResponse": "[(1, 8)]",
+      "friendlyResponse": "The shop in spot 1 sells the most cookies with 8 sales.",
+      "error": "None"
+    },
+    {
+      "question": "Which cookie is sold at the most shops?",
+      "sql": "\nSELECT c.CookieName, COUNT(cs.ShopID) AS ShopCount\nFROM Cookie c\nJOIN CookieShop cs ON c.CookieID = cs.CookieID\nGROUP BY c.CookieID\nORDER BY ShopCount DESC\nLIMIT 1;\n",
+      "queryRawResponse": "[('Pumpkin Chocolate Chip', 3)]",
+      "friendlyResponse": "Pumpkin Chocolate Chip cookies are sold in the most shops!",
+      "error": "None"
+    },
+    {
+      "question": "Who's birthday is next?",
+      "sql": "\nSELECT FirstName, LastName, Birthday\nFROM Customer\nWHERE Birthday >= date('now')\nORDER BY Birthday ASC\nLIMIT 1;\n",
+      "queryRawResponse": "[]",
+      "friendlyResponse": "I'm sorry, but I would need more context, such as a list of individuals and their birthdays, to provide an accurate answer.",
+      "error": "None"
+    },
+    {
+      "question": "Which shop has the most profit?",
+      "sql": "ite\nSELECT \"Order\".ShopID, SUM(CookieOrder.Amount * CookieShop.Price) AS TotalProfit\nFROM \"Order\"\nJOIN CookieOrder ON \"Order\".OrderID = CookieOrder.OrderID\nJOIN CookieShop ON CookieOrder.CookieID = CookieShop.CookieID\nGROUP BY \"Order\".ShopID\nORDER BY TotalProfit DESC\nLIMIT 1;\n",
+      "queryRawResponse": "[]",
+      "friendlyResponse": "I'm sorry, but I would need more context, such as a list of individuals and their birthdays, to provide an accurate answer.",
+      "error": "near \"ite\": syntax error"
+    },
+    {
+      "question": "Which is the least popular cookie across all shops?",
+      "sql": "\nSELECT c.CookieID, c.CookieName, SUM(co.Amount) AS TotalSold\nFROM Cookie c\nLEFT JOIN CookieOrder co ON c.CookieID = co.CookieID\nGROUP BY c.CookieID, c.CookieName\nORDER BY TotalSold ASC\nLIMIT 1;\n",
+      "queryRawResponse": "[(4, 'Oatmeal Raisin', 1)]",
+      "friendlyResponse": "The least popular cookie is Oatmeal Raisin.",
+      "error": "None"
+    },
+    {
+      "question": "Which customer has the biggest orders?",
+      "sql": "\nSELECT Customer.CustomerID, Customer.FirstName, Customer.LastName, SUM(CookieOrder.Amount) AS TotalAmount\nFROM Customer\nJOIN \"Order\" ON Customer.CustomerID = \"Order\".CustomerID\nJOIN CookieOrder ON \"Order\".OrderID = CookieOrder.OrderID\nGROUP BY Customer.CustomerID\nORDER BY TotalAmount DESC\nLIMIT 1;\n",
+      "queryRawResponse": "[(4, 'Joshua', 'Culmer', 5)]",
+      "friendlyResponse": "Joshua Culmer has the biggest orders with 5.",
+      "error": "None"
+    },
+    {
+      "question": "Where does Devin live?",
+      "sql": "\nSELECT Address.City, Address.State \nFROM Customer\nJOIN \"Order\" ON Customer.CustomerID = Order.CustomerID\nJOIN Shop ON Order.ShopID = Shop.ShopID\nJOIN Address ON Shop.AddressID = Address.AddressID\nWHERE Customer.FirstName = 'Devin';\n",
+      "queryRawResponse": "[(4, 'Joshua', 'Culmer', 5)]",
+      "friendlyResponse": "Joshua Culmer has the biggest orders with 5.",
+      "error": "near \"Order\": syntax error"
+    }
+  ]
+}
