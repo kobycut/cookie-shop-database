@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+
 aisql/aidb.sqlite
 aisql/r*
 
@@ -175,3 +176,4 @@ cython_debug/
 
 
 config.json
+aidb.sqlite
